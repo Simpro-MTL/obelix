@@ -17,6 +17,7 @@ import os
 from collections import OrderedDict
 
 from common.constants import VECTOR_DIM
+from common.embedding._registry_openrouter import resolve_openrouter_provider
 from common.embedding.constants import OPENAI_EMBEDDING_MODEL
 from common.embedding.protocols import EmbeddingProvider
 from common.embedding.providers.fake import FakeEmbeddingProvider
@@ -153,21 +154,24 @@ def get_embedding_provider(
     Parameters
     ----------
     name:
-        Provider identifier: ``"openai"``, ``"local"``, or ``"fake"``.
+        Provider identifier: ``"openai"``, ``"openrouter"``, ``"local"``,
+        or ``"fake"``.
     tenant_config:
         Optional ``ResolvedConfig``-shaped object for per-tenant overrides
-        (``openai_api_key``, ``embedding_model``). Can be ``None`` for
-        platform-only callers (e.g. core-worker).
+        (``openai_api_key``, ``openrouter_api_key``, ``embedding_model``).
+        Can be ``None`` for platform-only callers (e.g. core-worker).
 
     Raises
     ------
     ValueError
-        If the provider name is unknown, or if the OpenAI-compatible
-        env var combination would guarantee 100% failed embed calls
-        (``base_url`` set with ``send_dimensions=true``, or
-        ``base_url`` unset with ``send_dimensions=false``), or if
-        ``OPENAI_EMBEDDING_TRUNCATE_TO_DIM`` is set to anything other
-        than ``VECTOR_DIM``, or if it is not parseable as an integer.
+        If the provider name is unknown; if the OpenAI-compatible env var
+        combination would guarantee 100% failed embed calls (``base_url``
+        set with ``send_dimensions=true``, or ``base_url`` unset with
+        ``send_dimensions=false``); if ``OPENAI_EMBEDDING_TRUNCATE_TO_DIM``
+        / ``OPENROUTER_EMBEDDING_TRUNCATE_TO_DIM`` is set to anything other
+        than ``VECTOR_DIM`` or is not parseable as an integer; or if
+        ``OPENROUTER_EMBEDDING_SEND_DIMENSIONS`` is set to a non-canonical
+        value (not ``"true"``/``"false"``, case-insensitive).
     """
     if name == ProviderName.FAKE:
         return FakeEmbeddingProvider()
@@ -337,6 +341,9 @@ def get_embedding_provider(
             query_instruction,
             truncate_to_dim,
         )
+
+    if name == ProviderName.OPENROUTER:
+        return resolve_openrouter_provider(tenant_config)
 
     if name == ProviderName.LOCAL:
         return LocalEmbedding()

@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 import os
 
+from common.embedding._platform_openrouter import resolve_platform_openrouter_embedding
 from common.embedding.constants import OPENAI_EMBEDDING_MODEL
 from common.embedding.protocols import EmbeddingProvider
 from common.embedding.providers.openai import OpenAIEmbeddingProvider
@@ -148,6 +149,11 @@ def init_platform_embedding() -> None:
         except Exception:
             logger.exception("Failed to initialize platform OpenAI embedding provider")
             _platform_init_errors.append("openai-embedding")
+        return
+
+    if provider == ProviderName.OPENROUTER:
+        _platform_embedding, errors = resolve_platform_openrouter_embedding()
+        _platform_init_errors.extend(errors)
         return
 
     if provider == ProviderName.VERTEX:

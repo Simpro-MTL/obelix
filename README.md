@@ -159,10 +159,10 @@ OPENAI_API_KEY=sk-...
 | **OpenAI** (default) | `EMBEDDING_PROVIDER=openai`<br>`ENTITY_EXTRACTION_PROVIDER=openai` | `OPENAI_API_KEY` |
 | **Google Gemini** | `EMBEDDING_PROVIDER=openai`<br>`ENTITY_EXTRACTION_PROVIDER=gemini` | `GEMINI_API_KEY` + `OPENAI_API_KEY` |
 | **Anthropic** | `EMBEDDING_PROVIDER=openai`<br>`ENTITY_EXTRACTION_PROVIDER=anthropic` | `ANTHROPIC_API_KEY` + `OPENAI_API_KEY` |
-| **OpenRouter** | `EMBEDDING_PROVIDER=openai`<br>`ENTITY_EXTRACTION_PROVIDER=openrouter` | `OPENROUTER_API_KEY` + `OPENAI_API_KEY` |
+| **OpenRouter** | `EMBEDDING_PROVIDER=openrouter`<br>`ENTITY_EXTRACTION_PROVIDER=openrouter` | `OPENROUTER_API_KEY` |
 | **Self-hosted (TEI / bge-m3)** | `--profile embed-local` + `OPENAI_EMBEDDING_BASE_URL=http://tei:80/v1`<br>+ `OPENAI_EMBEDDING_MODEL=BAAI/bge-m3`<br>+ `OPENAI_EMBEDDING_SEND_DIMENSIONS=false` | none — runs locally |
 
-Anthropic, Gemini, and OpenRouter don't offer embedding APIs here — pair them with OpenAI (or with TEI) for embeddings. You can mix providers freely. Gemini uses the [Google AI Studio](https://aistudio.google.com/) key-auth Developer API (no GCP project/ADC required). The self-hosted TEI row keeps `EMBEDDING_PROVIDER=openai` because TEI speaks the same OpenAI-compatible API; see [`docs/local-embedder.md`](docs/local-embedder.md) for hardware sizing, GPU setup, and model swapping.
+Anthropic and Gemini don't offer embedding APIs here — pair them with OpenAI (or with TEI) for embeddings. OpenRouter offers its own OpenAI-compatible embeddings endpoint, so it needs only `OPENROUTER_API_KEY`. You can mix providers freely. Gemini uses the [Google AI Studio](https://aistudio.google.com/) key-auth Developer API (no GCP project/ADC required). The self-hosted TEI row keeps `EMBEDDING_PROVIDER=openai` because TEI speaks the same OpenAI-compatible API; see [`docs/local-embedder.md`](docs/local-embedder.md) for hardware sizing, GPU setup, and model swapping.
 
 </details>
 
@@ -905,7 +905,7 @@ All configuration is via environment variables or `.env`. See `.env.example` for
 | `POSTGRES_DB` | `memclaw` | Database name |
 | `POSTGRES_USE_IAM_AUTH` | `false` | Use GCP IAM for DB auth (managed Postgres on GCP only) |
 | `ADMIN_API_KEY` | *(empty)* | Admin API key — bypasses tenant enforcement |
-| `EMBEDDING_PROVIDER` | `openai` | `openai`, `local`, or `fake` |
+| `EMBEDDING_PROVIDER` | `openai` | `openai`, `openrouter`, `local`, or `fake` |
 | `ENTITY_EXTRACTION_PROVIDER` | `openai` | `openai`, `gemini`, `anthropic`, `openrouter`, `fake`, or `none` |
 | `ENTITY_EXTRACTION_MODEL` | `gpt-5.4-nano` | LLM model for enrichment and entity extraction |
 | `OPENAI_API_KEY` | — | Required for OpenAI embeddings and enrichment |
@@ -921,9 +921,9 @@ All configuration is via environment variables or `.env`. See `.env.example` for
 | `PLATFORM_LLM_API_KEY` | — | OpenAI API key for the platform LLM singleton |
 | `PLATFORM_LLM_GCP_PROJECT_ID` | — | GCP project for platform Vertex LLM |
 | `PLATFORM_LLM_GCP_LOCATION` | `us-central1` | GCP region for platform Vertex LLM |
-| `PLATFORM_EMBEDDING_PROVIDER` | *(empty)* | Platform-default embeddings: `openai` or empty to disable |
-| `PLATFORM_EMBEDDING_MODEL` | *(empty)* | Embedding model override (e.g. `text-embedding-3-small`) |
-| `PLATFORM_EMBEDDING_API_KEY` | — | OpenAI API key for platform embeddings |
+| `PLATFORM_EMBEDDING_PROVIDER` | *(empty)* | Platform-default embeddings: `openai`, `openrouter`, or empty to disable |
+| `PLATFORM_EMBEDDING_MODEL` | *(empty)* | Embedding model override (e.g. `text-embedding-3-small`, `openai/text-embedding-3-small`) |
+| `PLATFORM_EMBEDDING_API_KEY` | — | OpenAI or OpenRouter API key, matching `PLATFORM_EMBEDDING_PROVIDER` |
 
 </details>
 

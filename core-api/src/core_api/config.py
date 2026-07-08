@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # (bypassing the gateway via its public run.app URL) cannot impersonate a
     # tenant by setting identity headers itself. Unset (OSS/standalone/dev) = no-op.
     gateway_shared_secret: str | None = None
-    embedding_provider: str = "openai"  # fake | openai | local
+    embedding_provider: str = "openai"  # fake | openai | openrouter | local
     # Per-deploy control for where embedding + LLM enrichment run.
     #
     # - ``"inline"`` (default): both embed + enrich run on the request
@@ -491,6 +491,17 @@ def bridge_credentials_to_environ() -> None:
         ),
         "PLATFORM_LLM_GCP_PROJECT_ID": settings.platform_llm_gcp_project_id or "",
         "PLATFORM_LLM_GCP_LOCATION": settings.platform_llm_gcp_location or "",
+        # Platform-tier embedding singleton read by ``common.embedding._platform``.
+        # Makes both the pre-existing OpenAI and the new OpenRouter platform-
+        # embedding path config-driven via pydantic Settings instead of
+        # env-only; direct env export still wins (idempotent bridge below).
+        "PLATFORM_EMBEDDING_PROVIDER": settings.platform_embedding_provider or "",
+        "PLATFORM_EMBEDDING_MODEL": settings.platform_embedding_model or "",
+        "PLATFORM_EMBEDDING_API_KEY": (
+            settings.platform_embedding_api_key.get_secret_value()
+            if settings.platform_embedding_api_key
+            else ""
+        ),
     }
     for env_name, value in bridges.items():
         if value and not os.environ.get(env_name):
