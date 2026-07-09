@@ -31,6 +31,16 @@ OPENAI_EMBEDDING_MODEL: str = (
     os.environ.get("OPENAI_EMBEDDING_MODEL") or "text-embedding-3-small"
 )
 
+# OpenRouter embeddings (OpenAI-compatible endpoint). ``dimensions`` is
+# undocumented on OpenRouter, so the provider defaults send_dimensions=False
+# and truncates the model's native output to VECTOR_DIM client-side.
+OPENROUTER_EMBEDDING_MODEL: str = (
+    os.environ.get("OPENROUTER_EMBEDDING_MODEL") or "openai/text-embedding-3-small"
+)
+OPENROUTER_EMBEDDING_BASE_URL: str = (
+    os.environ.get("OPENROUTER_EMBEDDING_BASE_URL") or "https://openrouter.ai/api/v1"
+)
+
 # Per-call OpenAI timeout. Caps a single embed/embed_batch round trip
 # (TLS handshake + request + retry-with-backoff inside the SDK). Same
 # default + env shape as ``core_api.config.settings.openai_request_timeout_seconds``
