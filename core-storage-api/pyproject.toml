@@ -41,7 +41,7 @@ pubsub = ["google-cloud-pubsub>=2.23,<3"]
 # Datadog APM tracer (CAURA-0000). Opt-in: installed only in SaaS builds via
 # --build-arg DD_APM_ENABLED=true (--extra datadog); OSS/on-prem carry no
 # Datadog code. Auto-instruments FastAPI/SQLAlchemy/asyncpg/httpx.
-datadog = ["ddtrace>=4.10.6"]
+datadog = ["ddtrace>=4.10.7"]
 dev = [
     "core-storage-api[test,pubsub]",
     "mypy>=1.13,<3.0",
