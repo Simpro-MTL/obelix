@@ -9,7 +9,7 @@ dependencies = [
     # instead of walking app.routes (0.137's include_router mounts a sub-app,
     # hiding prefixed paths from app.routes). The committed uv.lock pins the exact
     # version; this range only bounds future re-locks.
-    "fastapi>=0.115,<1",
+    "fastapi>=0.139.0,<1",
     "uvicorn[standard]>=0.34,<1",
     "sqlalchemy[asyncio]>=2.0,<3",
     # SQLAlchemy[asyncio] pulls in greenlet. greenlet 3.5.0 shipped wheels for
