@@ -13,7 +13,7 @@ google-genai>=0.3
 # transitive pull, so a future GCP-SDK cleanup can't silently break it.
 requests>=2.31
 openai
-python-dateutil>=2.8,<3
+python-dateutil>=2.9.0.post0,<3
 httpx>=0.27,<1
 mcp>=1.26,<2
 
