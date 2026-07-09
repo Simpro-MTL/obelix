@@ -22,6 +22,16 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
+# SRC_PREFIX selects where core-api's code lives in the build context:
+#   - platform build / shared app-repo mirror (default): src/backend/ — the
+#     Backstage scaffold nests the backend under src/backend/ (sibling of an
+#     optional src/frontend/), and deploy.Jenkinsfile builds with no --build-arg.
+#   - monorepo build (this repo's CI + docker-compose): "." — the code sits at
+#     the repo root (common/, core-api/, plugin/, static/).
+# Default keeps the platform build byte-for-byte unchanged; the monorepo builds
+# pass --build-arg SRC_PREFIX=. to override (see .github/workflows + compose).
+ARG SRC_PREFIX=src/backend
+
 # System deps for asyncpg / hiredis
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev gcc \
@@ -36,7 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # per-package hashes from uv.lock, so `uv pip install` enters require-hashes mode
 # and verifies every downloaded wheel against the lock (supply-chain integrity).
 COPY --from=ghcr.io/astral-sh/uv:0.9.18 /uv /usr/local/bin/uv
-COPY core-api/pyproject.toml core-api/uv.lock core-api/README.md* ./core-api/
+COPY ${SRC_PREFIX}/core-api/pyproject.toml ${SRC_PREFIX}/core-api/uv.lock ${SRC_PREFIX}/core-api/README.md* ./core-api/
 # Dummy src so the project metadata resolves during export.
 RUN mkdir -p core-api/src/core_api && touch core-api/src/core_api/__init__.py
 # Document-ingest (kreuzberg, ~64MB) is an opt-in extra — off by default to
@@ -66,14 +76,17 @@ RUN VER="${MEMCLAW_VERSION:-$(python -c "import tomllib; print(tomllib.load(open
     && echo "Stamped MemClaw version: $VER"
 
 # Copy actual source
-COPY common/ /app/common/
-COPY core-api/src/ /app/core-api/src/
-COPY plugin/ /app/plugin/
-COPY static/ /app/static/
+COPY ${SRC_PREFIX}/common/ /app/common/
+COPY ${SRC_PREFIX}/core-api/src/ /app/core-api/src/
+COPY ${SRC_PREFIX}/plugin/ /app/plugin/
+COPY ${SRC_PREFIX}/static/ /app/static/
 
 
 # ── Production image ──
 FROM python:3.12-slim AS runtime
+
+# Re-declared: build ARGs do not cross FROM stage boundaries.
+ARG SRC_PREFIX=src/backend
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq5 \
@@ -105,11 +118,14 @@ ENV ENVIRONMENT=production
 COPY --from=dd-apm-src --chown=appuser:appuser /dd /app/dd
 # docker-entrypoint.sh is committed with the executable bit set, so COPY
 # preserves it — no chmod layer needed.
-COPY --chown=appuser:appuser core-api/docker-entrypoint.sh /app/docker-entrypoint.sh
+COPY --chown=appuser:appuser ${SRC_PREFIX}/core-api/docker-entrypoint.sh /app/docker-entrypoint.sh
 
 USER appuser
 
-EXPOSE 8000
+# Platform ingress is fixed at :3000. The listen port is PORT-driven so the
+# local docker-compose can keep the historical :8000 (it sets PORT=8000);
+# unset (platform / plain `docker run`) defaults to 3000.
+EXPOSE 3000
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["uvicorn", "core_api.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2", "--timeout-keep-alive", "65"]
+CMD ["sh", "-c", "exec uvicorn core_api.app:app --host 0.0.0.0 --port ${PORT:-3000} --workers 2 --timeout-keep-alive 65"]

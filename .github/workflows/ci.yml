@@ -165,7 +165,7 @@ jobs:
           persist-credentials: false
 
       - name: Build core-api image
-        run: docker build --platform linux/amd64 --target runtime -t core-api-versiontest -f core-api/Dockerfile .
+        run: docker build --platform linux/amd64 --build-arg SRC_PREFIX=. --target runtime -t core-api-versiontest -f core-api/Dockerfile .
 
       - name: Assert baked version is a real semver matching pyproject
         run: |

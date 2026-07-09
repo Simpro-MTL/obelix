@@ -99,6 +99,11 @@ services:
     build:
       context: .
       dockerfile: core-api/Dockerfile
+      args:
+        # Monorepo build: core-api's code is at the repo root, not src/backend/
+        # (the Dockerfile now defaults SRC_PREFIX to src/backend for the
+        # platform / shared-app-repo build).
+        SRC_PREFIX: "."
     ports:
       - "${API_PORT:-8000}:8000"
     env_file:
@@ -106,6 +111,10 @@ services:
       - path: .env
         required: false
     environment:
+      # The image CMD now defaults to :3000 (the platform ingress port); pin
+      # PORT=8000 so the historical local dev port is preserved (host maps
+      # 8000:8000 and the healthcheck below hits :8000).
+      PORT: "8000"
       # Override DB host for Docker network
       POSTGRES_HOST: db
       CORE_STORAGE_API_URL: http://core-storage-api:8002
