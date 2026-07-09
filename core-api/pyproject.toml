@@ -33,7 +33,7 @@ dependencies = [
     "python-jose[cryptography]>=3.3",
     "pyotp>=2.9",
     "cachetools>=5.3",
-    "croniter>=2.0",
+    "croniter>=6.2.3",
     # redis-py cap lifted <6 -> <9 (lock resolves 8.0.0). 8.x dropped its pyjwt
     # transitive and reworked the connection pool, but core-api only uses
     # ``redis.asyncio.from_url`` (cache.py) and ``r.pipeline(transaction=False)``
