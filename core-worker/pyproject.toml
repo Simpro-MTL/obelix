@@ -46,7 +46,7 @@ local = ["sentence-transformers>=3.0,<4"]
 datadog = ["ddtrace>=4.10.6"]
 dev = [
     "core-worker[test,pubsub]",
-    "mypy>=1.13,<3.0",
+    "mypy>=2.2.0,<3.0",
     "ruff>=0.8,<1.0",
 ]
 test = [
