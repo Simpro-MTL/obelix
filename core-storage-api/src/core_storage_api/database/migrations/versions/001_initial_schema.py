@@ -22,9 +22,11 @@ logger = logging.getLogger("alembic.runtime.migration")
 
 def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS vector")
-    _vector_version = op.get_bind().execute(
-        sa.text("SELECT extversion FROM pg_extension WHERE extname = 'vector'")
-    ).scalar()
+    _vector_version = (
+        op.get_bind()
+        .execute(sa.text("SELECT extversion FROM pg_extension WHERE extname = 'vector'"))
+        .scalar()
+    )
     logger.info("INSTALLED vector version: %s", _vector_version)
 
     # ── memories ──
