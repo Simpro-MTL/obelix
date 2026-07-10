@@ -1,0 +1,80 @@
+name: obelix
+components:
+- name: obelix
+  mtl_subtree: .
+  app_repo: /home/simon/projects/work/simpro-shared/obelix/obelix
+  charts_repo: /home/simon/projects/work/simpro-shared/obelix/obelix-charts
+  sync:
+  - mtl: README.md
+    shared: README.md
+    additive: false
+  - mtl: .gitattributes
+    shared: .gitattributes
+    additive: false
+  - mtl: alembic.ini
+    shared: src/backend/alembic.ini
+    additive: false
+  - mtl: core-api/Dockerfile
+    shared: src/backend/core-api/Dockerfile
+    additive: false
+  - mtl: requirements.txt
+    shared: src/backend/requirements.txt
+    additive: false
+  - mtl: core-api/uv.lock
+    shared: src/backend/core-api/uv.lock
+    additive: false
+  - mtl: core-api/pyproject.toml
+    shared: src/backend/core-api/pyproject.toml
+    additive: false
+  - mtl: scripts
+    shared: src/backend/scripts
+    additive: false
+  - mtl: core-api/src
+    shared: src/backend/core-api/src
+    additive: false
+  - mtl: core-api/docker-entrypoint.sh
+    shared: src/backend/core-api/docker-entrypoint.sh
+    additive: false
+  - mtl: core-storage-api/src
+    shared: src/backend/core-storage-api/src
+    additive: false
+  - mtl: core-storage-api/pyproject.toml
+    shared: src/backend/core-storage-api/pyproject.toml
+    additive: false
+  - mtl: core-storage-api/uv.lock
+    shared: src/backend/core-storage-api/uv.lock
+    additive: false
+  - mtl: core-storage-api/Dockerfile
+    shared: src/backend/core-storage-api/Dockerfile
+    additive: false
+  - mtl: common
+    shared: src/backend/common
+    additive: false
+  - mtl: plugin
+    shared: src/backend/plugin
+    additive: false
+  - mtl: static
+    shared: src/backend/static
+    additive: false
+  - mtl: deploy/Dockerfile
+    shared: containers/Dockerfile
+    additive: false
+  - mtl: deploy/entrypoint.sh
+    shared: src/backend/deploy/entrypoint.sh
+    additive: false
+  charts_sync: []
+  preserve:
+  - .env.dev.example
+  - .gitignore
+  - CHANGELOG.md
+  - Makefile
+  - catalog-info.yaml
+  - deploy.Jenkinsfile
+  - promoteImage.Jenkinsfile
+  - score.yaml
+  - score.yaml.example
+  - score.yaml.simpro-apps.example
+  - scripts
+  - terraform
+  - terraform.Jenkinsfile
+  clear_dirs: []

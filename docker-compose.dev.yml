@@ -84,6 +84,11 @@ services:
     build:
       context: .
       dockerfile: core-api/Dockerfile
+      args:
+        # Monorepo build: core-api's code is at the repo root, not src/backend/
+        # (the Dockerfile now defaults SRC_PREFIX to src/backend for the
+        # platform / shared-app-repo build).
+        SRC_PREFIX: "."
     # See core-storage-api above for the rationale on user mapping.
     user: "${UID:-1000}:${GID:-1000}"
     command: >

@@ -46,8 +46,13 @@ jobs:
         include:
           - name: core-api
             dockerfile: core-api/Dockerfile
+            # core-api's Dockerfile defaults SRC_PREFIX=src/backend for the
+            # platform / shared-app-repo build; the monorepo build (repo-root
+            # context) overrides it to ".".
+            build_args: SRC_PREFIX=.
           - name: core-storage-api
             dockerfile: core-storage-api/Dockerfile
+            build_args: ""
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -133,6 +138,7 @@ jobs:
         with:
           context: .
           file: ${{ matrix.dockerfile }}
+          build-args: ${{ matrix.build_args }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

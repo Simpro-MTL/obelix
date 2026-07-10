@@ -1,0 +1,23 @@
+obelix:
+  targets:
+  - qa
+  - dev
+  base_path: /
+  services:
+  - service: postgres
+    klass: convertible
+    recipe: null
+    resolution: null
+    confidence: high
+  - service: redis
+    klass: convertible
+    recipe: null
+    resolution: shared Valkey via config env (no score flag)
+    confidence: high
+  - service: sqlite
+    klass: needs-review
+    recipe: null
+    resolution: "embedded DB on ephemeral pods \u2014 Postgres (`database` flag)?\
+      \ human-confirm"
+    confidence: high
+  non_backstage: false
