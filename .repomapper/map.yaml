@@ -15,7 +15,7 @@ components:
     shared: src/backend/alembic.ini
     additive: false
   - mtl: core-api/Dockerfile
-    shared: containers/Dockerfile
+    shared: src/backend/core-api/Dockerfile
     additive: false
   - mtl: requirements.txt
     shared: src/backend/requirements.txt
@@ -35,6 +35,18 @@ components:
   - mtl: core-api/docker-entrypoint.sh
     shared: src/backend/core-api/docker-entrypoint.sh
     additive: false
+  - mtl: core-storage-api/src
+    shared: src/backend/core-storage-api/src
+    additive: false
+  - mtl: core-storage-api/pyproject.toml
+    shared: src/backend/core-storage-api/pyproject.toml
+    additive: false
+  - mtl: core-storage-api/uv.lock
+    shared: src/backend/core-storage-api/uv.lock
+    additive: false
+  - mtl: core-storage-api/Dockerfile
+    shared: src/backend/core-storage-api/Dockerfile
+    additive: false
   - mtl: common
     shared: src/backend/common
     additive: false
@@ -43,6 +55,12 @@ components:
     additive: false
   - mtl: static
     shared: src/backend/static
+    additive: false
+  - mtl: deploy/Dockerfile
+    shared: containers/Dockerfile
+    additive: false
+  - mtl: deploy/entrypoint.sh
+    shared: src/backend/deploy/entrypoint.sh
     additive: false
   charts_sync: []
   preserve:
