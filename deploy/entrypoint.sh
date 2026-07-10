@@ -8,6 +8,14 @@ STORAGE_UVICORN=/app/core-storage-api/.venv/bin/uvicorn
 API_UVICORN=/app/core-api/.venv/bin/uvicorn
 PORT="${PORT:-3000}"
 
+# If a command was passed (e.g. the platform migration job runs
+# `docker run <image> sh -c '…alembic upgrade head'`), exec it directly instead
+# of booting the bundled services. The K8s Deployment passes no command, so it
+# still starts the full bundle below.
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 # 1. core-storage-api in the background (internal — never exposed to the ALB).
 echo "[entrypoint] starting core-storage-api on :8002"
 PYTHONPATH=/app/core-storage-api/src:/app \

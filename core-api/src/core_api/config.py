@@ -302,6 +302,23 @@ class Settings(BaseSettings):
         # vars like LOG_LEVEL=debug are accepted.
         return v.upper() if isinstance(v, str) else v
 
+    @field_validator("environment", mode="before")
+    @classmethod
+    def _map_platform_env(cls, v: Any) -> Any:
+        # Simpro Cloud injects ENVIRONMENT=qa|dev|au|us|uk; map to the canonical
+        # {development, production, sandbox} set so prod regions (au/us/uk) get
+        # production behaviour (e.g. error-detail hiding) and qa/dev stay
+        # non-prod. Canonical values pass through unchanged.
+        if isinstance(v, str):
+            return {
+                "qa": "development",
+                "dev": "development",
+                "au": "production",
+                "us": "production",
+                "uk": "production",
+            }.get(v, v)
+        return v
+
     @field_validator("security_audit_alert_recipients", mode="before")
     @classmethod
     def _split_recipients(cls, v: object) -> object:
