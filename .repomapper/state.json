@@ -1,0 +1,13 @@
+{
+  "repos": {
+    "/home/simon/projects/work/simpro-shared/obelix/obelix": {
+      "last_mtl_sha": "7427ca0350d1e9978be4c7f3ed55649036bbe32a",
+      "last_onboard_at": "2026-07-09T21:35:22.331978+00:00",
+      "last_pull": null,
+      "template_version": 1
+    }
+  },
+  "confirmed_resolutions": {
+    "sqlite": "local-dev-only (confirmed 2026-07-09)"
+  }
+}
