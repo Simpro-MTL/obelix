@@ -8,6 +8,36 @@ STORAGE_UVICORN=/app/core-storage-api/.venv/bin/uvicorn
 API_UVICORN=/app/core-api/.venv/bin/uvicorn
 PORT="${PORT:-3000}"
 
+# If a command was passed (e.g. the platform migration job runs
+# `docker run <image> sh -c '…alembic upgrade head'`), exec it directly instead
+# of booting the bundled services. The K8s Deployment passes no command, so it
+# still starts the full bundle below.
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
+# Assemble DATABASE_URL for core-storage-api from the platform's DB env.
+# Simpro Cloud injects the pieces — DATABASE_WRITER_HOST + DATABASE_PORT (ConfigMap)
+# and DB_USERNAME/DB_PASSWORD/DB_NAME (ExternalSecret) — but not the single DSN
+# core-storage-api reads. Without this it falls back to its localhost default and
+# dies with ECONNREFUSED. Fires only when DATABASE_URL isn't already set (local
+# docker-compose sets it), so it's platform-only.
+if [ -z "${DATABASE_URL:-}" ] && [ -n "${DATABASE_WRITER_HOST:-}" ]; then
+    _db_user="${DB_USERNAME:-${DB_USER:-}}"
+    _db_pass="${DB_PASSWORD:-${DB_PASS:-}}"
+    _db_name="${DB_NAME:-}"
+    _db_port="${DATABASE_PORT:-5432}"
+    _db_ssl=""
+    if [ "${POSTGRES_REQUIRE_SSL:-false}" = "true" ]; then _db_ssl="?ssl=require"; fi
+    export DATABASE_URL="postgresql+asyncpg://${_db_user}:${_db_pass}@${DATABASE_WRITER_HOST}:${_db_port}/${_db_name}${_db_ssl}"
+    # Reader pool: use the RO endpoint when provided; otherwise core-storage-api
+    # falls back to the writer on its own.
+    if [ -n "${DATABASE_READER_HOST:-}" ]; then
+        export READ_DATABASE_URL="postgresql+asyncpg://${_db_user}:${_db_pass}@${DATABASE_READER_HOST}:${_db_port}/${_db_name}${_db_ssl}"
+    fi
+    echo "[entrypoint] assembled DATABASE_URL (host=${DATABASE_WRITER_HOST} db=${_db_name} ssl=${POSTGRES_REQUIRE_SSL:-false})"
+fi
+
 # 1. core-storage-api in the background (internal — never exposed to the ALB).
 echo "[entrypoint] starting core-storage-api on :8002"
 PYTHONPATH=/app/core-storage-api/src:/app \

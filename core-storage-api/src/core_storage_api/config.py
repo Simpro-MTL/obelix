@@ -88,6 +88,35 @@ class Settings(BaseSettings):
         # vars like LOG_LEVEL=debug are accepted.
         return v.upper() if isinstance(v, str) else v
 
+    @field_validator("environment", mode="before")
+    @classmethod
+    def _map_platform_env(cls, v: Any) -> Any:
+        # Simpro Cloud injects ENVIRONMENT=qa|dev|au|us|uk; map to the canonical
+        # {development, production, sandbox} set so prod regions (au/us/uk) get
+        # production behaviour and qa/dev stay non-prod. Canonical values pass
+        # through unchanged.
+        if isinstance(v, str):
+            return {
+                "qa": "development",
+                "dev": "development",
+                "au": "production",
+                "us": "production",
+                "uk": "production",
+            }.get(v, v)
+        return v
+
+    @field_validator("database_url", "read_database_url")
+    @classmethod
+    def _use_async_driver(cls, v: str) -> str:
+        # The engine and alembic both use ``create_async_engine``, which requires
+        # the asyncpg driver. The platform migration job (deploy.Jenkinsfile)
+        # injects a plain ``postgresql://`` DSN, so normalise any sync-scheme DSN
+        # to ``postgresql+asyncpg://``. Empty / already-async values pass through.
+        for sync_scheme in ("postgresql://", "postgres://"):
+            if v.startswith(sync_scheme):
+                return "postgresql+asyncpg://" + v[len(sync_scheme) :]
+        return v
+
     # CORS — internal service, restrict to known callers
     cors_origins: str = "http://localhost:8000"
 
